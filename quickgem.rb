@@ -22,7 +22,8 @@ module QuickGem
     end
 
     def stale?
-      !cache_dir.exist? || cache_dir.mtime < spec_dir.mtime
+      spec_dir.exist? and
+        !cache_dir.exist? || cache_dir.mtime < spec_dir.mtime
     end
 
     def cache_lib
