@@ -198,6 +198,8 @@ module Kernel
   alias require_without_quickgem require
 
   def require(file)
+    gem_original_require(file)
+  rescue LoadError
     QuickGem::PATHS.each do |path|
       path.find_by_lib(file) do |data|
 
@@ -212,7 +214,7 @@ module Kernel
       end
     end
 
-    gem_original_require(file)
+    raise
   end
 end
 
