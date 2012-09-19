@@ -191,8 +191,7 @@ class Gem::Dependency
       end
     end
 
-    # Fallback to slow version
-    to_spec_without_quickgem
+    nil
   end
 
   def to_specs
@@ -229,7 +228,7 @@ module Kernel
         end
       end
 
-      require_without_quickgem(file)
+      gem_original_require(file)
     end 
   end
 end
