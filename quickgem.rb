@@ -3,6 +3,10 @@ require 'rubygems/specification'
 require 'pathname'
 require 'digest/md5'
 
+class << File
+  alias binread read unless method_defined?(:binread)
+end
+
 module QuickGem
   CACHE_BASE = Pathname.new(File.expand_path('../cache', __FILE__))
 
@@ -14,7 +18,7 @@ module QuickGem
     end
 
     def md5
-      Digest::MD5.hexdigest(@path.to_path)
+      Digest::MD5.hexdigest(@path.to_s)
     end
 
     def cache_dir
@@ -205,6 +209,7 @@ module Kernel
 
         if Gem.unresolved_deps.has_key?(data[:name])
           reqs = Gem.unresolved_deps[data[:name]]
+          reqs = [reqs.requirement] if reqs.is_a?(Gem::Dependency)
           next unless reqs.all? { |req| req.satisfied_by?(data[:version]) }
         end
 
