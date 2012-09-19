@@ -156,20 +156,7 @@ module QuickGem
 end
 
 class << Gem
-  alias try_activate_without_quickgem try_activate
   alias bin_path_without_quickgem bin_path
-
-  def try_activate(file)
-    QuickGem::PATHS.each do |path|
-      path.find_by_lib(file) do |data|
-        spec = Gem::Specification.load(data[:spec_file])
-        spec.activate
-        return true
-      end
-    end
-
-    false
-  end
 
   def bin_path(name, exec_name = nil, *requirements)
     if spec = Gem.loaded_specs[name]
@@ -211,25 +198,21 @@ module Kernel
   alias require_without_quickgem require
 
   def require(file)
-    if Gem.unresolved_deps.empty?
-      require_without_quickgem(file)
-    else
-      QuickGem::PATHS.each do |path|
-        path.find_by_lib(file) do |data|
+    QuickGem::PATHS.each do |path|
+      path.find_by_lib(file) do |data|
 
-          if Gem.unresolved_deps.has_key?(data[:name])
-            reqs = Gem.unresolved_deps[data[:name]]
-            next unless reqs.all? { |req| req.satisfied_by?(data[:version]) }
-          end
-
-          spec = Gem::Specification.load(data[:spec_file])
-          spec.activate
-          return gem_original_require(file)
+        if Gem.unresolved_deps.has_key?(data[:name])
+          reqs = Gem.unresolved_deps[data[:name]]
+          next unless reqs.all? { |req| req.satisfied_by?(data[:version]) }
         end
-      end
 
-      gem_original_require(file)
-    end 
+        spec = Gem::Specification.load(data[:spec_file])
+        spec.activate
+        return gem_original_require(file)
+      end
+    end
+
+    gem_original_require(file)
   end
 end
 
