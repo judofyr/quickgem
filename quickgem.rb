@@ -211,7 +211,7 @@ module Kernel
   alias require_without_quickgem require
 
   def require(file)
-    if Gem.unresolved_deps.empty? or Gem.loaded_path?(file)
+    if Gem.unresolved_deps.empty?
       require_without_quickgem(file)
     else
       QuickGem::PATHS.each do |path|
