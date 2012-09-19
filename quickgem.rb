@@ -8,7 +8,7 @@ class << File
 end
 
 module QuickGem
-  CACHE_BASE = Pathname.new(File.expand_path('../cache', __FILE__))
+  CACHE_BASE = Pathname.new(File.expand_path('../cache', __FILE__)) unless defined? CACHE_BASE
 
   class Path
     attr_reader :path
@@ -150,7 +150,7 @@ module QuickGem
     end
   end
 
-  PATHS = Gem.paths.path.map { |path| Path.new(path) }
+  PATHS = Gem.paths.path.map { |path| Path.new(path) } unless defined? PATHS
 
   def self.build
     PATHS.each do |path|
