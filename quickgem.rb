@@ -137,7 +137,7 @@ module QuickGem
         datas = Marshal.load(File.binread(path))
         datas.each do |data|
           if requirement.satisfied_by? data[:version]
-            return Gem::Specification.load(data[:spec_file])
+            yield Gem::Specification.load(data[:spec_file])
           end
         end
       end
@@ -173,7 +173,7 @@ class << Gem
 
   def bin_path(name, exec_name = nil, *requirements)
     if spec = Gem.loaded_specs[name]
-      return spec.bin_file exec_name
+      return spec.bin_file(exec_name)
     end
 
     bin_path_without_quickgem(name, exec_name, *requirements)
@@ -186,7 +186,7 @@ class Gem::Dependency
 
   def to_spec
     QuickGem::PATHS.each do |path|
-      if spec = path.find_by_gem(name, requirement)
+      path.find_by_gem(name, requirement) do |spec|
         return spec
       end
     end
@@ -198,7 +198,7 @@ class Gem::Dependency
     res = []
 
     QuickGem::PATHS.each do |path|
-      if spec = path.find_by_gem(name, requirement)
+      path.find_by_gem(name, requirement) do |spec|
         res << spec
       end
     end
