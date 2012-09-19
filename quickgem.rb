@@ -167,7 +167,7 @@ class << Gem
       end
     end
 
-    try_activate_without_quickgem(file)
+    false
   end
 
   def bin_path(name, exec_name = nil, *requirements)
