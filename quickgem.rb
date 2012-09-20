@@ -9,6 +9,7 @@ end
 
 module QuickGem
   CACHE_BASE = Pathname.new(File.expand_path('../cache', __FILE__)) unless defined? CACHE_BASE
+  BundlerHacks = File.expand_path('../bundler_hacks.rb', __FILE__)
 
   class Path
     attr_reader :path
@@ -157,6 +158,28 @@ module QuickGem
       path.build
     end
   end
+
+  class Timer
+    def initialize
+      @stack = [["", Time.now, 0]]
+    end
+
+    def s(str)
+      warn "*"*@stack.size + " #{str}"
+    end
+
+    def <<(name)
+      s "Entering: #{name}"
+      @stack << [name, Time.now, 0]
+    end
+
+    def pop
+      name, time, timings = @stack.pop
+      dur = ((Time.now - time) * 1000).round(1)
+      s "Leaving: #{name}. #{dur}ms total. #{dur - timings}ms here."
+      @stack[-1][2] += dur
+    end
+  end
 end
 
 class << Gem
@@ -202,6 +225,7 @@ module Kernel
   alias require_without_quickgem require
 
   def require(file)
+    $QUICKGEM_TIMER << file if $QUICKGEM_TIMER
     gem_original_require(file)
   rescue LoadError
     QuickGem::PATHS.each do |path|
@@ -220,24 +244,37 @@ module Kernel
     end
 
     raise
+  ensure
+    require QuickGem::BundlerHacks if $QUICKGEM_BUNDLER && file =~ /\bbundler$/
+    $QUICKGEM_TIMER.pop if $QUICKGEM_TIMER
   end
 end
 
-$QUICKGEM_ALL = false
+$QUICKGEM_BUNDLER = File.basename($0) != "bundle"
 
-class << Gem::Specification
-  alias _all_without_quickgem _all
+if ENV['QUICKGEM_DEBUG']
+  class << Gem::Specification
+    alias _all_without_quickgem _all
 
-  def _all
-    if !$QUICKGEM_ALL
-      puts "Fallback at:"
-      puts caller
-      $QUICKGEM_ALL = true
+    def _all
+      if !$QUICKGEM_ALL
+        warn "[QuickGem] Fallback at:"
+        warn caller.join("\n")
+      end
+
+      t = Time.now
+      _all_without_quickgem
+    ensure
+      if !$QUICKGEM_ALL 
+        dur = (Time.now - t) * 1000
+        warn "[QuickGem] Loaded specs in #{dur.round(1)}ms"
+        $QUICKGEM_ALL = true
+      end
     end
-
-    _all_without_quickgem
   end
-end if ENV['QUICKGEM_DEBUG']
+
+  $QUICKGEM_TIMER = QuickGem::Timer.new
+end
 
 if $0 == __FILE__
   QuickGem.build
