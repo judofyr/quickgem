@@ -1,3 +1,5 @@
+unless ENV['QUICKGEM_DISABLE']
+
 require 'rubygems'
 require 'rubygems/specification'
 require 'pathname'
@@ -286,3 +288,4 @@ QuickGem::PATHS.each do |path|
   path.build if path.stale?
 end
 
+end
