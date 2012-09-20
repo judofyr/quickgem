@@ -2,6 +2,10 @@
 
 QuickGem speeds up RubyGems loading by monkey-patching.
 
+*NOTE:* This is just one big hack. A proper solution requires patches across
+many Ruby projects (most notably RubyGems and Bundler). I'm considering do it
+proerly, but for now an ugly hack works fine for me.
+
 I've seen rougly 4 times faster startup time, but I have roughly ~250
 different gems and numerous versions installed. You won't notice much if you
 have few gems installed.
