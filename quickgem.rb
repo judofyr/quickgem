@@ -253,8 +253,11 @@ module Kernel
 end
 
 $QUICKGEM_BUNDLER = File.basename($0) != "bundle"
+$QUICKGEM_TIMER = nil
 
 if ENV['QUICKGEM_DEBUG']
+  $QUICKGEM_ALL = false
+
   class << Gem::Specification
     alias _all_without_quickgem _all
 
