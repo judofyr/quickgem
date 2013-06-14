@@ -227,6 +227,7 @@ module Kernel
   alias require_without_quickgem require
 
   def require(file)
+    file = file.to_s
     $QUICKGEM_TIMER << file if $QUICKGEM_TIMER
     gem_original_require(file)
   rescue LoadError
