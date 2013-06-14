@@ -4,8 +4,13 @@ require 'bundler/definition'
 
 module Bundler
   class LazySpecification
-    def __materialize__
-      @specification =  Gem::Dependency.new(name, version).to_spec
+    old_materialize = instance_method(:__materialize__)
+    define_method(:__materialize__) do
+      if source.is_a?(Bundler::Source::Rubygems)
+        @specification = Gem::Dependency.new(name, version).to_spec
+      else
+        old_materialize.bind(self).call
+      end
     end
   end
 
