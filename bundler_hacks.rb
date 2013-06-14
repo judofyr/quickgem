@@ -27,6 +27,14 @@ module Bundler
         specs
       end
     end
+
+    # This is quite possibly wrong, but I have no idea what this method is supposed to do:
+    # https://github.com/bundler/bundler/commit/9dac5767bc49bfe1e15eccedf1cc07895d105d55
+    def specs_changed?(source, &block)
+      locked = @locked_sources.find(&block)
+
+      !locked || source.specs != locked.specs
+    end
   end
 end
 
