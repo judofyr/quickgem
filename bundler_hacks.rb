@@ -32,8 +32,16 @@ module Bundler
     # https://github.com/bundler/bundler/commit/9dac5767bc49bfe1e15eccedf1cc07895d105d55
     def specs_changed?(source, &block)
       locked = @locked_sources.find(&block)
-
       !locked || source.specs != locked.specs
+    end
+
+    def converge_paths
+      @sources.any? do |source|
+        next unless source.instance_of?(Source::Path)
+        specs_changed?(source) do |ls|
+          ls.class == source.class && ls.send(:relative_path) == source.send(:relative_path)
+        end
+      end
     end
   end
 end
