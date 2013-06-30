@@ -223,6 +223,12 @@ class Gem::Dependency
   end
 end
 
+unless defined?(Gem.unresolved_deps)
+  def Gem.unresolved_deps
+    Gem::Specification.unresolved_deps
+  end
+end
+
 module Kernel
   alias require_without_quickgem require
 
